@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ### 前言
 
-本文第一节介绍了两个基础的读取文件的函数；第二节中介绍了读取一些常用格式文件的方法，包括csv、excel等格式的文件；第三节中介绍了`rio`包，文件读取的利器（A Swiss-Army Knife for Data I/O）；第四节中则简单介绍了一些更多的读取文件相关的包。  
+本文主要介绍了一些常用的R读取文件的方法。在第一节中将会介绍两个基础的读取文件的函数；第二节中介绍了读取一些常用格式文件的方法，包括csv、excel等文件；第三节中介绍了`rio`包，一个文件读取的利器（A Swiss-Army Knife for Data I/O）；第四节中则简单介绍了一些与文件读取相关的包。  
 
 ### 基础读取方法
 
@@ -32,7 +32,7 @@ scan中有许多参数可以设置，下面列举些比较有用的参数，其�
 - `what`: 读取数据的类型，默认是`double`，可以设置为`character`等  
 - `n`: 指定读取最大行数
 - `skip`: 指定跳过的行数  
-- `sep`: 指定分隔符，默认会按照任何空白（空格、换行、tab等进行分割），在指定`character`类型时，一般一行为一个字符串，因此一般需要指定分隔符为`\n`  
+- `sep`: 指定分隔符，默认会按照任何空白（空格、换行、tab等进行分割），在指定`character`类型时，如果一行为一个字符串并且字符串中含有空格，需要指定分隔符为`\n`  
 - `na.strings`: 指定设置为`NA`的字符串  
 
 我们跳过3行，然后读4行数据，并且指定为`character`类型。  
@@ -42,7 +42,7 @@ x <- scan("data/read_double.txt", what = character(), skip = 3, n = 4)
 str(x)
 ```
 
-我们也可以指定`text`参数，直接读取字符串，这样有时处理字符串更为方便时，我们可以使用这种方式。  
+我们也可以指定`text`参数，直接读取字符串，当处理字符串更为方便时，我们可以使用这种方式。  
 
 ```{r read_text}
 x <- scan(text = "1.2 2.3 3.4", sep = " ")
@@ -51,8 +51,8 @@ print(x)
 
 #### read.table读取
 
-`read.table`一般用于读取有固定格式的文件，如常用的csv文件等，可以指定分隔符、是否包含列名等。在`scan`读取中介绍的几个参数，除了`what`参数，其他参数也可以在`read.table`中使用。`read.table`有会一定的机制自动确定各列数据类型，不需要我们指定。我们也可以通过`colClasses`来指定读入数据的类型，但不推荐使用，一般我们可以在读入数据后进行调整。  
-我们读取一个关于客户还贷信息的数据，数据来源于[kaggle](https://www.kaggle.com/zhijinzhai/loandata)，可以在kaggle的网站上找到该数据。  
+`read.table`一般用于读取有固定格式的文件，如常用的csv文件等，可以指定分隔符、是否包含列名等。在`scan`读取中介绍的几个参数，除了`what`参数，其他参数也可以在`read.table`中使用。`read.table`有一定的机制自动确定各列数据类型，不需要我们指定。我们也可以通过`colClasses`来指定读入数据的类型，但不推荐使用，一般我们可以在读入数据后进行调整。  
+下面我们来读取一个关于客户还贷信息的数据，数据来源于[kaggle](https://www.kaggle.com/zhijinzhai/loandata)，可以在kaggle的网站上找到该数据。  
 
 ```{r read_table}
 load_payments_data <- read.table("data/Loan payments data.csv", 
@@ -63,7 +63,7 @@ load_payments_data <- read.table("data/Loan payments data.csv",
 str(load_payments_data)
 ```
 
-我们可以看到读取时默认碰到字符串时，会将其转化为`factor`类型，但是很多情况下我们希望其仍然维持为字符串的类型，在后期处理时，根据需要将其指定为我们需要的数据类型，例如日期类型等，我们可以使用`stringsAsFactors`参数来避免这个问题。  
+我们可以看到`read.table`读取数据时碰到字符串时，会默认将其转化为`factor`类型，所有的基础读取函数都会默认转化为`factor`类型，但是很多情况下我们希望其仍然维持为字符串的类型，在后期处理时，根据需要将其指定为我们需要的数据类型，如日期类型等，因此我们可以使用`stringsAsFactors`参数来避免这个问题。  
 
 ```{r read_table_string_as_factor}
 load_payments_data <- read.table("data/Loan payments data.csv", header = TRUE, 
@@ -91,7 +91,7 @@ str(load_payments_data)
 
 #### 文件编码
 
-在读取数据时，特别是中文数据，指定的读取编码与文件编码不一致时，将会引起乱码问题。R读取文件时默认会调用系统使用的编码，例如在UNIX系统下一般使用的UTF-8编码，在windows XP下使用的默认编码为GBK，可以通过`fileEncoding`设置读取文件的编码格式，例如我们读取一份UTF-8编码的文件。  
+在读取数据时，特别是中文数据，指定的读取编码与文件编码不一致时，将会引起乱码问题。R读取文件时默认会调用系统使用的编码，例如在UNIX系统下一般默认使用的UTF-8编码，而在windows XP下使用的默认编码为GBK，可以通过`fileEncoding`设置读取文件的编码格式，例如我们读取一份UTF-8编码的文件。  
 
 ```{r read_utf8}
 utf8_data <- read.table("data/uft8_data.csv", stringsAsFactors = FALSE, sep = ",", 
@@ -128,7 +128,7 @@ str(fwf_data)
 
 #### 读取excel文件
 
-读取excel文件我们需要安装外的包来读取，基础的函数中没有包含读取excel文件的函数。读取excel有好几个包可以实现，我们这里使用`xlsx`包中的`read.xlsx`函数来读取excel文件。
+读取excel文件我们需要安装外的包来读取，基础的函数中没有包含读取excel文件的函数。实现读取excel的包有好几个，这里使用`xlsx`包中的`read.xlsx`函数来读取excel文件。
 
 ```{r read_xlsx}
 library(xlsx)
@@ -140,7 +140,7 @@ str(load_payments_data)
 
 #### 读取JSON文件
 
-同样基础的函数中没有读取JSON格式文件的函数，我们需要使用额外的包来读取，并且也有好几个包实现了读取JSON格式文件，我们这里使用`jsonlite`来读取JSON文件。
+同样基础的函数中没有读取JSON格式文件的函数，我们需要使用额外的包来读取，我们可以使用`jsonlite`包来读取JSON文件。
 
 ```{r read_json}
 library(jsonlite)
@@ -149,9 +149,9 @@ json_data <- fromJSON("data/json_data.json")
 str(json_data)
 ```
 
-### `rio`包
+### `rio`
 
-读取不同类型的数据文件会使用到不同的包，这样非常麻烦，需要记住相应的包和函数，`rio`包则提供了一个统一的接口来读取这些文件，除了上面提到的这些常用的文件格式，还包括SAS、SPSS、YAML等格式文件，只需要下载好相应的包，使用起来非常方便。可以访问其[github](https://github.com/leeper/rio)的主页来获取更多信息。需要注意的是，安装`rio`包时，如果没有自动安装相应的包，在读取时，根据提示，安装需要的包。  
+读取不同类型的数据文件会使用到不同的包，这样非常麻烦，需要记住相应的包和函数，`rio`包则提供了一个统一的接口来读取这些文件，除了上面提到的这些常用的文件格式，还包括SAS、SPSS、YAML的文件，只需要下载好相应的包，调用`import`函数，使用起来非常方便。可以访问其[github](https://github.com/leeper/rio)的主页来获取更多信息。需要注意的是，安装`rio`包时，如果没有自动安装相应的包，在读取时，根据提示，安装需要的包。  
 例如我们读取一个csv文件。  
 
 ```{r rio_import_csv}
@@ -161,9 +161,9 @@ load_payments_data <- import("data/Loan payments data.csv")
 str(load_payments_data)
 ```
 
-调用`import`函数可以来读取文件，其会根据文件的扩展名来自动选择相应的读取函数，因此不需要指定读取的方式，非常方便。  
-`import`中可以使用`setclass`参数来指定读入后的数据类型，默认为`data.frame`，也可以更改为`tbl_df`、`data.table`等。  
-例如我们读取excel文件，并且将其读入的类型设置为`data.table`。  
+`import`函数其会根据文件的扩展名来自动选择相应的读取函数，因此不需要指定读取的方式，非常方便。  
+`import`读取后，获得数据框的类默认为`data.frame`，可以通过`setclass`来增加或者修改为`tbl_df`、`data.table`等。  
+例如我们读取excel文件，并且将其读入数据框的类增加`data.table`。  
 
 ```{r rio_tbl_df}
 load_payments_data <- import("data/Loan payments data.xlsx", setclass = "data.table")
@@ -171,3 +171,47 @@ str(load_payments_data)
 ```
 
 更多详情可以参看`import`的帮助文档。  
+
+### 更多与文件读取相关的包
+
+本小节将会简单介绍一些其他包中读取文件的函数，与先前的不同，这些读取函数会对数据框附加一些其他的类用于相应包中的处理，或者用于一些其他特殊目的。  
+
+#### `readr`
+
+`readr`包中实现了`read.table`、`read.csv`等函数，包中的函数名称使用"_"来替代基础函数中的"."，如`read_csv`。`readr`中实现的函数比基础的函数读取效率要高，字符串会被默认的读取为`character`类型。
+
+```{r readr}
+library(readr)
+
+load_payments_data <- read_csv("data/Loan payments data.csv")
+print(load_payments_data)
+```
+
+读取的数据框会增加`tbl_df`和`tbl`类。关于`tbl_df`类可以参看[tibble](http://snowhyzhang.name/riko-tibble/index.html)。如果不使用这些类型的性质，可以将其作为普通的`data.frame`类来使用。  
+
+#### `data.table`
+
+对于数据量较大的文件，基础的读取函数非常的低效，读取非常慢，当文件达到G级的时候，推荐使用`data.table`的`fread`进行读取。例如我们使用`fread`来读取文件。    
+
+```{r fread}
+library(data.table)
+
+load_payments_data <- fread("data/Loan payments data.csv")
+print(load_payments_data)
+```
+
+同样，fread也会为数据框增加`data.table`的类，如果不使用这些类型的性质，我们也可以将其作为普通的`data.frame`类来使用。`data.table`支持许多对数据的操作，特别是在大数据量的时候使用，非常高效，有兴趣可以在网上查找相关的资料。  
+
+### `ff`
+
+`ff`用于创建基于硬盘的数据框，而不是基于内存的，因此当内存受限，我们无法将数据读入到内存中时，可以考虑使用`ff`包来读取数据。  
+
+```{r ff}
+library(ff)
+
+load_payments_data <- read.csv.ffdf(file = "data/Loan payments data.csv", header = TRUE)
+print(load_payments_data)
+```
+
+更多关于`ff`包的信息可以参考其[主页](http://ff.r-forge.r-project.org/)。  
+
