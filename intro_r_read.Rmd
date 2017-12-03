@@ -1,7 +1,7 @@
 ---
 title: "R读取文件数据"
 author: "snowhyzhang"
-date: "2017-10-03"
+date: "2017-10-06"
 output: html_document
 ---
 
@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ### 前言
 
 本文主要介绍了一些常用的R读取文件的方法。在第一节中将会介绍两个基础的读取文件的函数；第二节中介绍了读取一些常用格式文件的方法，包括csv、excel等文件；第三节中介绍了`rio`包，一个文件读取的利器（A Swiss-Army Knife for Data I/O）；第四节中则简单介绍了一些与文件读取相关的包。  
+本文的代码和使用的数据可以在[github](https://github.com/snowhyzhang/misaka)上找到。
 
 ### 基础读取方法
 
